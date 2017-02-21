@@ -1,0 +1,1 @@
+This repository contains the work for ECE 4580's Autonomous Vehicles learning module.
