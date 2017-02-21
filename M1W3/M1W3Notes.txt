@@ -1,0 +1,30 @@
+bumper node: /mobile_base/events/bumper is when bumper event happens
+	Message type is kobuki_msgs/BumperEvent
+/mobile_base/sensors/bump_pc might be constant source?
+
+For all of the others there is /mobile_base/events/stuff
+and /mobile_base/sensors/stuff
+Screenshot included.
+
+
+The kobuki has 3 bumpers
+
+
+What does "call the file kobuki_bumpers" mean?
+
+
+
+
+Part 2
+Wheel event is cliff?
+/mobile_base/events/fliff/
+	Sends a kobuki_msgs/CliffEvent
+
+
+LIES, we want a wheel drop message actually
+/mobile_base/events/wheel_drop
+kobuki_msgs/WheelDropEvent
+
+TODO: Draw the state machine
+
+
