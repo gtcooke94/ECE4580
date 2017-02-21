@@ -49,6 +49,9 @@ class GoForward():
 
 		# bhit is bumper hit. The most significant bit is the left bumper, the next is the middle bumper, the next is the right bumper, the next is the left wheel, and the least significant bit is the right wheel. 1 Means it's been pushed or the wheels are dropped, 0 means not hit and wheels are not dropped
 		self.bhit = 0b00000
+		# self.bhit will be made up of self.bumpers and self.wheels
+		self.bumpers = 0b000
+		self.wheels = 0b00
 		rospy.loginfo("Line 48")		
 
 		# Safety states are 0, 1, and 2.
@@ -107,25 +110,25 @@ class GoForward():
 			state = "pressed"
 			if (data.bumper == BumperEvent.LEFT) :
 				bumper = "left"
-				self.bhit = self.bhit or 0b10000
+				self.bumpers = (self.bhit >> 2) or 0b100
 			elif (data.bumper == BumperEvent.RIGHT) :
 				bumper = "right"
-				self.bhit = self.bhit or 0b00100
+				self.bumpers = (self.bhit >> 2) or 0b001
 			else:
 				bumper = "center"
-				self.bhit = self.bhit or 0b01000
+				self.bumpers = (self.bhit >> 2) or 0b010
 		else:
 			state = "released"
 			if (data.bumper == BumperEvent.LEFT) :
 				bumper = "left"
-				self.bhit = self.bhit and 0b00011
+				self.bumpers = (self.bhit >> 2) and 0b011
 			elif (data.bumper == BumperEvent.RIGHT) :
 				bumper = "right"
-				self.bhit = self.bhit and 0b00011
+				self.bumpers = (self.bhit >> 2) and 0b001
 			else:
 				bumper = "center"
-				self.bhit = self.bhit and 0b00011
-
+				self.bumpers = (self.bhit >> 2) and 0b010
+		self.bhit = (self.bumpers << 2)
 		rospy.loginfo("Bumper %s was %s."%(bumper, state))	
 		
 	
@@ -134,19 +137,19 @@ class GoForward():
 		if (data.state == WheelDropEvent.RAISED):
 			state = "raised"
 			if (data.wheel == WheelDropEvent.LEFT):
-				self.bhit = self.bhit and 0b11100
+				self.bhit= self.bhit and 0b11100
 				wheel = "left"
 			else:
-				self.bhit = self.bhit and 0b11100
+				self.bhit= self.bhit and 0b11100
 				wheel = "right"
 		else:
 			state = "dropped"
 			if (data.wheel == WheelDropEvent.LEFT):
 				wheel = "left"
-				self.bhit = self.bhit or 0b00010
+				self.bhit= self.bhit or 0b00010
 			else:
 				wheel = "right"
-				self.bhit = self.bhit or 0b00001
+				self.bhit= self.bhit or 0b00001
 		rospy.loginfo("The %s wheel was %s."%(wheel, state))
 
 	def shutdown(self):
