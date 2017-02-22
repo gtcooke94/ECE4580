@@ -62,7 +62,6 @@ class GoForward():
 		self.safety = 0b00000
 
 		#TurtleBot will stop if we don't keep telling it to move.  How often should we tell it to move? 10 HZ
-		r = rospy.Rate(10);
 
 		# Twist is a datatype for velocity
 		move_cmd = Twist()

@@ -80,7 +80,7 @@ class GoForward():
 			# Make the state machine here
 
 			if (self.safety == 0):
-				rospy.loginfo("In state 000")
+				rospy.loginfo("In state 0")
 				if (self.bhit == 0):
 					self.cmd_vel.publish(move_cmd)
 				if (self.bhit > 0):
@@ -119,13 +119,13 @@ class GoForward():
 			state = "released"
 			if (data.bumper == BumperEvent.LEFT) :
 				bumper = "left"
-				self.bhit = self.bhit & 0b01100
+				self.bhit = self.bhit & 0b01111
 			elif (data.bumper == BumperEvent.RIGHT) :
 				bumper = "right"
-				self.bhit = self.bhit & 0b11000
+				self.bhit = self.bhit & 0b11011
 			else:
 				bumper = "center"
-				self.bhit = self.bhit & 0b10100
+				self.bhit = self.bhit & 0b10111
 		rospy.loginfo("Bumper %s was %s."%(bumper, state))	
 		
 	
