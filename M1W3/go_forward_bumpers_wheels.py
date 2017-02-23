@@ -88,6 +88,7 @@ class GoForward():
 			if (self.safety == 1):
 				rospy.loginfo("In state 1")
 				rospy.loginfo("%s"%(bin(self.bhit)))
+				self.cmd_vel.publish(Twist())
 				if (self.bhit == 0):
 					self.safety = 2
 			if (self.safety == 2):
