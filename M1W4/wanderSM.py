@@ -10,26 +10,29 @@ class GoForward():
     def __init__(self):
         # initiliaze
         rospy.init_node('GoForward', anonymous=False)
-        rospy.loginfo("Line 11")
+        rospy.loginfo("Line 13")
 
         # What function to call when you ctrl + c   
         rospy.on_shutdown(self.shutdown)
-        rospy.loginfo("Line 15")
+        rospy.loginfo("Line 17")
         
         # Create a publisher which can "talk" to TurtleBot & tell it to move
         # This will tell it to move slowly then stop when there is a bumper | wheel event
         self.cmd_vel = rospy.Publisher('cmd_vel_mux/input/navi', Twist, queue_size=10)
-        rospy.loginfo("Line 20")
+        rospy.loginfo("Line 22")
         self.mMsg = Twist()
         self.bhitMsg = Twist()
-        self.ang = {1:-.6, 2:-.6, 3:0, 4:.6, 5:.6}
-        self.fwd = {1:.1, 2:.2, 3:.3, 4:.2, 5:.1}
-        self.dbgmsg = {1:'Turn Left', 2:'Veer Left', 3:'Move Straight', 4:'Veer Right', 5:'Turn Right'}
+        self.ang = {1:0, 2:.4, 3:-.4, 4:.8, 5:-.8}
+        #self.ang = {1:.8, 2:.4, 3:0, 4:-.4, 5:-.8}
+        self.fwd = {1:.2, 2:.15, 3:.15, 4:.1, 5:.1}
+        #self.fwd = {1:.1, 2:.15, 3:.2, 4:.15, 5:.1}
+        self.dbgmsg = {1:'Move Straight', 2:'Veer Left', 3:'Veer Right', 4:'Turn Left', 5:'Turn Right'}
+        #self.dbgmsg = {1:'Turn Left', 2:'Veer Left', 3:'Move Straight', 4:'Veer Right', 5:'Turn Right'}
         
         rospy.Subscriber("/mobile_base/events/bumper", BumperEvent, self.BumperEventCallback)
         rospy.Subscriber("/mobile_base/events/wheel_drop", WheelDropEvent, self.WheelDropEventCallback)
         rospy.Subscriber("/scan", LaserScan, self.LaserScanCallback)
-        rospy.loginfo("Line 30")
+        rospy.loginfo("Line 32")
         # Define the states for the state machine
 
         # bhit is bumper hit. The most significant bit is the left bumper, the next is the middle bumper, the next is the right bumper, the next is the left wheel, & the least significant bit is the right wheel. 1 Means it's been pushed | the wheels are dropped, 0 means not hit & wheels are not dropped
@@ -37,7 +40,7 @@ class GoForward():
         # self.bhit will be made up of self.bumpers & self.wheels
         self.bumpers = 0b000
         self.wheels = 0b00
-        rospy.loginfo("Line 48")        
+        rospy.loginfo("Line 40")        
 
         # Safety states are 0, 1, & 2.
         # 0 means that the robot is moving forward
@@ -105,6 +108,7 @@ class GoForward():
                 bumper = "center"
                 self.bhit = self.bhit | 0b01000
                 self.bhitMsg.linear.x = -.25
+                self.bhitMsg.angular.z = 0
         else:
             state = "released"
             if (data.bumper == BumperEvent.LEFT) :
@@ -171,13 +175,13 @@ class GoForward():
         toSubtract4 = 0
         toSubtract5 = 0
         
-        for entry in range(0, entries/5):
+        for entry in range(0, int(math.floor(entries/5)-1)):
             if not (math.isnan(laserscan.ranges[entry])):
                 totalEntries1 += laserscan.ranges[entry]
             else:
                 totalEntries1 += 10
 
-        self.average1 = totalEntries1/(entries/5)
+        self.average1 = totalEntries1/(int(math.floor(entries/5)))
 
 
         '''
@@ -188,12 +192,12 @@ class GoForward():
         #self.average1 = totalEntries1/(entries/5 - toSubtract1 + 1)
         '''
 
-        for entry in range(entries/5, 2*entries/5):
+        for entry in range(int(math.floor(entries/5)), int(math.floor((2*entries)/5)-1)):
             if not (math.isnan(laserscan.ranges[entry])):
                 totalEntries2 += laserscan.ranges[entry]
             else:
                 totalEntries2 += 10
-        self.average2 = totalEntries2/(entries/5)
+        self.average2 = totalEntries2/(int(math.floor(entries/5)))
         '''
             #if not (math.isnan(laserscan.ranges[entry])):
             #    totalEntries2 += laserscan.ranges[entry]
@@ -202,13 +206,13 @@ class GoForward():
         #self.average2 = totalEntries2/(entries/5 - toSubtract2 + 1)
         '''
 
-        for entry in range(2*entries/5, 3*entries/5):
+        for entry in range(int(math.floor(2*entries/5)), int(math.floor(3*entries/5)-1)):
 
             if not (math.isnan(laserscan.ranges[entry])):
                 totalEntries3 += laserscan.ranges[entry]
             else:
                 totalEntries3 += 10
-        self.average3 = totalEntries3/(entries/5)
+        self.average3 = totalEntries3/(int(math.floor(entries/5)))
 
         '''
             if not (math.isnan(laserscan.ranges[entry])):
@@ -217,13 +221,13 @@ class GoForward():
                 toSubtract3 += 1  
         self.average3 = totalEntries3/(entries/5 - toSubtract3 + 1)'''
 
-        for entry in range(3*entries/5, 4*entries/5):
+        for entry in range(int(math.floor(3*entries/5)), int(math.floor(4*entries/5)-1)):
 
             if not (math.isnan(laserscan.ranges[entry])):
                 totalEntries4 += laserscan.ranges[entry]
             else:
                 totalEntries4 += 10
-        self.average4 = totalEntries4/(entries/5)
+        self.average4 = totalEntries4/(int(math.floor(entries/5)))
 
         '''
             if not (math.isnan(laserscan.ranges[entry])):
@@ -232,13 +236,13 @@ class GoForward():
                 toSubtract4 += 1 
         self.average4 = totalEntries4/(entries/5 - toSubtract4 + 1)'''
 
-        for entry in range(4*entries/5, entries):
+        for entry in range(int(math.floor(4*entries/5)), entries):
 
             if not (math.isnan(laserscan.ranges[entry])):
                 totalEntries5 += laserscan.ranges[entry]
             else:
                 totalEntries5 += 10
-        self.average5 = totalEntries5/(entries/5)
+        self.average5 = totalEntries5/(int(math.floor(entries/5)))
 
         '''
             if not (math.isnan(laserscan.ranges[entry])):
@@ -256,11 +260,15 @@ class GoForward():
         variable sect and then  set the appropriate angular and linear 
         velocities, and log messages.
         These are published and the sect variables are reset.'''
-        averages = [self.average5,self.average4,self.average3,self.average2,self.average1]
+        averages = [self.average3,self.average4,self.average2,self.average5,self.average1]
+        #averages = [self.average5,self.average4,self.average3,self.average2,self.average1]
         rospy.loginfo(averages)
         #for average in averages:
         #    rospy.loginfo("1: " + str(average))
         maxSector = averages.index(max(averages)) + 1
+        # I think this logic is wrong cause it defaults left.
+        # One way to combat this would make "1" go straight in our archetecture, and then have 2 and 3
+        # be the veer states, and then 4 and 5 be the turn states
         self.mMsg.angular.z = self.ang[maxSector]
         self.mMsg.linear.x = self.fwd[maxSector]
         rospy.loginfo(self.dbgmsg[maxSector])
