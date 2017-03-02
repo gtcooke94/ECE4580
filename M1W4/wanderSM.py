@@ -175,13 +175,13 @@ class GoForward():
         toSubtract4 = 0
         toSubtract5 = 0
         
-        for entry in range(0, int(math.floor(entries/5)-1)):
+        for entry in range(0, (entries/5)-1):
             if not (math.isnan(laserscan.ranges[entry])):
                 totalEntries1 += laserscan.ranges[entry]
             else:
                 totalEntries1 += 10
 
-        self.average1 = totalEntries1/(int(math.floor(entries/5)))
+        self.average1 = totalEntries1/(entries/5)
 
 
         '''
@@ -192,12 +192,12 @@ class GoForward():
         #self.average1 = totalEntries1/(entries/5 - toSubtract1 + 1)
         '''
 
-        for entry in range(int(math.floor(entries/5)), int(math.floor((2*entries)/5)-1)):
+        for entry in range((entries/5), ((2*entries)/5)-1):
             if not (math.isnan(laserscan.ranges[entry])):
                 totalEntries2 += laserscan.ranges[entry]
             else:
                 totalEntries2 += 10
-        self.average2 = totalEntries2/(int(math.floor(entries/5)))
+        self.average2 = totalEntries2/(entries/5)
         '''
             #if not (math.isnan(laserscan.ranges[entry])):
             #    totalEntries2 += laserscan.ranges[entry]
@@ -206,13 +206,13 @@ class GoForward():
         #self.average2 = totalEntries2/(entries/5 - toSubtract2 + 1)
         '''
 
-        for entry in range(int(math.floor(2*entries/5)), int(math.floor(3*entries/5)-1)):
+        for entry in range((2*entries/5), (3*entries/5)-1):
 
             if not (math.isnan(laserscan.ranges[entry])):
                 totalEntries3 += laserscan.ranges[entry]
             else:
                 totalEntries3 += 10
-        self.average3 = totalEntries3/(int(math.floor(entries/5)))
+        self.average3 = totalEntries3/(entries/5)
 
         '''
             if not (math.isnan(laserscan.ranges[entry])):
@@ -221,13 +221,13 @@ class GoForward():
                 toSubtract3 += 1  
         self.average3 = totalEntries3/(entries/5 - toSubtract3 + 1)'''
 
-        for entry in range(int(math.floor(3*entries/5)), int(math.floor(4*entries/5)-1)):
+        for entry in range((3*entries/5), (4*entries/5)-1):
 
             if not (math.isnan(laserscan.ranges[entry])):
                 totalEntries4 += laserscan.ranges[entry]
             else:
                 totalEntries4 += 10
-        self.average4 = totalEntries4/(int(math.floor(entries/5)))
+        self.average4 = totalEntries4/(entries/5)
 
         '''
             if not (math.isnan(laserscan.ranges[entry])):
@@ -236,13 +236,13 @@ class GoForward():
                 toSubtract4 += 1 
         self.average4 = totalEntries4/(entries/5 - toSubtract4 + 1)'''
 
-        for entry in range(int(math.floor(4*entries/5)), entries):
+        for entry in range((4*entries/5), entries):
 
             if not (math.isnan(laserscan.ranges[entry])):
                 totalEntries5 += laserscan.ranges[entry]
             else:
                 totalEntries5 += 10
-        self.average5 = totalEntries5/(int(math.floor(entries/5)))
+        self.average5 = totalEntries5/(entries/5)
 
         '''
             if not (math.isnan(laserscan.ranges[entry])):
