@@ -1,0 +1,35 @@
+Note: roslaunch turtlebot_bringup 3dsensor.launch depth_registration:=false
+
+Get Readings
+ranges = laserscan.ranges
+
+distanceToObstacle = sqrt(laserscanDistance^2 - ROBOTRADIUS^2)
+
+minAngle = laserscan.angle_min
+maxAngle = laserscan.angle_max
+angleIncrement = laserscan.angle_increment
+
+anglesArray = range(minAngle, maxAngle + angleIncrement/2, angleIncrement)
+
+boundariesLeft = anglesArray + atan(ROBOTRADIUS / distanceToObstacle)
+boundariesRight = anglesArray - atan(ROBOTRADIUS / distanceToObstacle)
+
+phiFOVLeft = minAngle?
+phiFOVRight = maxAngle?
+dFOVLeft = 
+
+How to deal with Nonholonomic Constraints?
+
+
+Paper is Complicated? Can we do it in a more simlified way?
+
+
+Take in laserscan data
+Assume everything further away than 3 meters can be moved towards - set it to 0.
+(readings > 3) = 0
+Find the longest length of 0's.
+	Use Python Function or write short algorithm
+Find the angle to the center of longest zeros 
+	Using min/max angles and angle increments
+
+

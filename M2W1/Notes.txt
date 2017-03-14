@@ -1,0 +1,2 @@
+Implement Procedure for Gap, Using select depth images from obstacle avoiding scenarios, turn in the gap array and maximum gap outputs. Demonstrate with rviz the gap array, make sure you process NaNs correctly. 
+Turn in Pseudo Code
