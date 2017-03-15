@@ -18,6 +18,7 @@ class FindGap():
         # Laserscan Subscribers
         rospy.Subscriber("/scan", LaserScan, self.LaserScanCallback)
         self.gapArray = []
+        self.gapToPublish = []
         self.startIndex = []
         self.endIndex = []
 
@@ -31,14 +32,24 @@ class FindGap():
         
     def LaserScanCallback(self, laserscan):
         self.gapArray = []
+        self.gapToPublish = []
         self.MakeGapArray(laserscan)
         [self.startIndex, self.endIndex] = self.GapFinder()
 
         #Publish to the gapscan topic.
+        self.MakeGapToPublish()
         gapMessage = laserscan
-        gapMessage.ranges = self.gapArray
+        gapMessage.ranges = self.gapToPublish
         self.gapPublisher.publish(gapMessage)
         rospy.loginfo(str(self.startIndex) + '  ' + str(self.endIndex))
+
+    def MakeGapToPublish(self):
+    	entries = len(self.gapArray)
+    	for entry in range(0, entries):
+    		if self.gapArray[entry] == 0:
+    			self.gapToPublish.append(1)
+    		else:
+    			self.gapToPublish.append(0)
 
     def MakeGapArray(self, laserscan):
         entries = len(laserscan.ranges)
