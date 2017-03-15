@@ -38,6 +38,7 @@ class FindGap():
         gapMessage = laserscan
         gapMessage.ranges = self.gapArray
         self.gapPublisher.publish(gapMessage)
+        rospy.loginfo(str(self.startIndex) + '  ' + str(self.endIndex))
 
     def MakeGapArray(self, laserscan):
         entries = len(laserscan.ranges)
@@ -45,7 +46,25 @@ class FindGap():
         for entry in range(0, entries):
             #Deal with NaNs better
             if math.isnan(laserscan.ranges[entry]):
-                self.gapArray.append(0)
+                if (0 < entry) & (entry < entries-1): # all middle values
+                    if (math.isnan(laserscan.ranges[entry+1])):
+                        self.gapArray.append(0)
+                    elif (math.isnan(laserscan.ranges[entry-1])):
+                        self.gapArray.append(0)
+                    else:
+                        value = (laserscan.ranges[entry-1] + laserscan.ranges[entry+1])/2
+                        self.gapArray.append(value if value < 3 else 0)  
+                elif (entry == 0): #first value
+                    if (math.isnan(laserscan.ranges[entry+1])):
+                        self.gapArray.append(0)
+                    else:
+                        self.gapArray.append(laserscan.ranges[entry+1])
+                else: #last value
+                    if (math.isnan(laserscan.ranges[entry-1])):
+                        self.gapArray.append(0)
+                    else:
+                        self.gapArray.append(laserscan.ranges[entry-1])
+
             elif (laserscan.ranges[entry] > 3):
                 self.gapArray.append(0)
             else:
@@ -60,16 +79,17 @@ class FindGap():
         for curIndex in range(0, len(self.gapArray)):
             if self.gapArray[curIndex] == 0:
                 curZeroLength += 1
+                prevIndex = curIndex
                 if curIndex == (len(self.gapArray) - 1):
-                    if curZeroLength > maxZeroLength:
+                    if (curZeroLength > maxZeroLength):
                         maxZeroLength = curZeroLength
                         endIndex = curIndex
                         curZeroLegnth = 0
             if self.gapArray[curIndex] is not 0:
-                if curZeroLength > maxZeroLength:
+                if (curZeroLength > maxZeroLength):
                     maxZeroLength = curZeroLength
                     endIndex = prevIndex
-                    curZeroLegnth = 0
+                    curZeroLength = 0
         return [(endIndex - maxZeroLength + 1), endIndex]
 
 
