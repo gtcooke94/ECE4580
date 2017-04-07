@@ -3,8 +3,13 @@ from geometry_msgs.msg import Twist
 from kobuki_msgs.msg import BumperEvent
 from kobuki_msgs.msg import WheelDropEvent
 from sensor_msgs.msg import LaserScan
+from nav_msgs.msg import Odometry
 import math
 from math import radians
+
+# Right now we find the largest gap
+# Need: Calculate the gap center angle AND the final heading angle.
+# then it says to implement the algorithm so I think this means we need to put it into our movement state machine
 
 class FindGap():
     def __init__(self):
@@ -17,6 +22,7 @@ class FindGap():
         
         # Laserscan Subscribers
         rospy.Subscriber("/scan", LaserScan, self.LaserScanCallback)
+        rospy.Subscriber("/odom", Odometry, self.OdometryCallback)
         self.gapArray = []
         self.gapToPublish = []
         self.startIndex = []
@@ -29,19 +35,26 @@ class FindGap():
         # Is this necessary?
         rospy.spin()
                         
-        
+    def OdometryCallback(self, odom):
+    	#rospy.loginfo(str(odom.pose.pose))
+    	self.worldGoalAngle = math.atan((odom.pose.pose.position.y)/(20 - odom.pose.pose.position.x))
+    	self.turtlebotGoalAngle = self.worldGoalAngle + odom.pose.pose.orientation.z
+    	self.turtlebotangle = self.turtlebotGoalAngle + self.gapTheta
+
+
     def LaserScanCallback(self, laserscan):
         self.gapArray = []
         self.gapToPublish = []
+        self.deltaTheta = 0
         self.MakeGapArray(laserscan)
-        [self.startIndex, self.endIndex] = self.GapFinder()
+        [self.startIndex, self.endIndex, self.gapTheta] = self.GapFinder()
 
         #Publish to the gapscan topic.
         self.MakeGapToPublish()
         gapMessage = laserscan
         gapMessage.ranges = self.gapToPublish
         self.gapPublisher.publish(gapMessage)
-        rospy.loginfo(str(self.startIndex) + '  ' + str(self.endIndex))
+        rospy.loginfo('Odom Angle: ' + str(self.turtlebotangle) + '   Gap Angle: ' + str(self.gapTheta) + '   Goal Angle: ' + str(self.turtlebotangle)
 
     def MakeGapToPublish(self):
     	entries = len(self.gapArray)
@@ -53,7 +66,7 @@ class FindGap():
 
     def MakeGapArray(self, laserscan):
         entries = len(laserscan.ranges)
-
+        self.deltaTheta = laserscan.angle_increment
         for entry in range(0, entries):
             #Deal with NaNs better
             if math.isnan(laserscan.ranges[entry]):
@@ -101,7 +114,13 @@ class FindGap():
                     maxZeroLength = curZeroLength
                     endIndex = prevIndex
                     curZeroLength = 0
-        return [(endIndex - maxZeroLength + 1), endIndex]
+        # Right here we can have this return the angle of the middle of the gap
+        # middle of the gap is at index
+        midGapIndex = round((((endIndex - (maxZeroLength)) + (endIndex)) / 2))
+        zeroDegInd = round(len(self.gapArray)/2) - 1
+        self.gapTheta = (midGapIndex - zeroDegInd) * self.deltaTheta
+        #rospy.loginfo(str(self.gapTheta) + ' ' + str(midGapIndex) + ' ' + str(zeroDegInd) +' ' + str(self.deltaTheta))
+        return [(endIndex - maxZeroLength + 1), endIndex, self.gapTheta]
 
 
 
@@ -114,7 +133,6 @@ class FindGap():
         velocities, and log messages.
         These are published and the sect variables are reset.'''
         averages = [self.average3,self.average4,self.average2,self.average5,self.average1]
-        #averages = [self.average5,self.average4,self.average3,self.average2,self.average1]
         rospy.loginfo(averages)
         #for average in averages:
         #    rospy.loginfo("1: " + str(average))
@@ -125,15 +143,6 @@ class FindGap():
         self.mMsg.angular.z = self.ang[maxSector]
         self.mMsg.linear.x = self.fwd[maxSector]
         rospy.loginfo(self.dbgmsg[maxSector])
-        self.reset_averages()
-
-    def reset_averages(self):
-        '''Resets the below variables before each new scan message is read'''
-        self.average1 = 0
-        self.average2 = 0
-        self.average3 = 0
-        self.average4 = 0
-        self.average5 = 0
 
 
 
