@@ -42,6 +42,7 @@ class FindGap():
     	self.turtlebotangle = self.turtlebotGoalAngle + self.gapTheta
 
 
+
     def LaserScanCallback(self, laserscan):
         self.gapArray = []
         self.gapToPublish = []
@@ -55,6 +56,7 @@ class FindGap():
         gapMessage.ranges = self.gapToPublish
         self.gapPublisher.publish(gapMessage)
         rospy.loginfo('Odom Angle: ' + str(self.turtlebotangle) + '   Gap Angle: ' + str(self.gapTheta) + '   Goal Angle: ' + str(self.turtlebotangle)
+
 
     def MakeGapToPublish(self):
     	entries = len(self.gapArray)
